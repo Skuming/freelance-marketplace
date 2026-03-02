@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Roles {
+  FREELANCER
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id String @id @default(uuid())
+  name String? 
+  email String @unique
+  password String
+  createdAt DateTime @default(now())
+  role Roles
+  wallet Wallet?
+  ordersAsCustomer Order[] @relation("CustomerOrders")
+  ordersAsFreelancer Order[] @relation("FreelancerOrders")
+  chatsAsCustomer Chat[] @relation("CustomerChats")
+  chatsAsFreelancer Chat[] @relation("FreelancerChats")
+  messages Message[]
+}
+
+enum OrderStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+model Order {
+  id String @id @default(uuid())
+  title String
+  description String
+  stack String
+  budget Int
+  status OrderStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  customerId String
+  freelancerId String?
+  customer User @relation("CustomerOrders", fields: [customerId], references: [id])
+  freelancer User? @relation("FreelancerOrders", fields: [freelancerId], references: [id])
+  chats Chat[]
+}
+
+model Chat {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  orderId String
+  customerId String
+  freelancerId String
+  order Order @relation(fields: [orderId], references: [id])
+  customer User @relation("CustomerChats", fields: [customerId], references: [id])
+  freelancer User @relation("FreelancerChats", fields: [freelancerId], references: [id])
+  messages Message[]
+
+  @@unique([orderId, customerId, freelancerId])
+}
+
+model Message {
+  id String @id @default(uuid())
+  text String
+  createdAt DateTime @default(now())
+  chatId String
+  senderId String
+  chat Chat @relation(fields: [chatId], references: [id])
+  sender User @relation(fields: [senderId], references: [id])
+}
+
+model Wallet {
+  id String @id @default(uuid())
+  userId String @unique
+  balance Int @default(0)
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+enum TransactionType {
+  DEPOSIT
+}
+
+model Transaction {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  walletId String
+  amount Int
+  type TransactionType
+  description String?
+  wallet Wallet @relation(fields: [walletId], references: [id])
+}
