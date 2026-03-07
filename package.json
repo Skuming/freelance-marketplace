@@ -6,7 +6,11 @@
     "dev": "node server.mjs --dev",
     "build": "next build --turbopack",
     "start": "node server.mjs",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

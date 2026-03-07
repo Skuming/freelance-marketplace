@@ -21,19 +21,24 @@ const Footer = () => {
           gap: 1,
         }}
       >
-        <Typography level="body-sm" sx={{ opacity: 0.72 }}>
-          <Stack direction="row" alignItems="center" spacing={0.6}>
-            <Workflow size={15} />
-            <span>Freelancer.com • {new Date().getFullYear()}</span>
-          </Stack>
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={0.6}>
+          <Workflow size={15} />
+          <Typography level="body-sm" sx={{ opacity: 0.72 }}>
+            Freelancer.com • {new Date().getFullYear()}
+          </Typography>
+        </Stack>
 
         <Link
           href="https://github.com"
           target="_blank"
           rel="noreferrer"
           underline="none"
-          sx={{ display: "inline-flex", alignItems: "center", gap: 0.6, opacity: 0.72 }}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.6,
+            opacity: 0.72,
+          }}
         >
           <Github size={14} />
           Репозиторий
