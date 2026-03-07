@@ -1,14 +1,16 @@
 import { prisma } from "@db/prisma";
 import { requireSession } from "@/lib/apiAuth";
 
+type ChatBroadcast = (chatId: string, payload: unknown) => void;
+
 export async function POST(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { session, response } = await requireSession();
   if (!session) return response;
 
-  const { id } = params;
+  const { id } = await params;
   const body = await req.json();
   const text = String(body?.text ?? "").trim();
 
@@ -45,7 +47,23 @@ export async function POST(
       senderId: session.user.id,
       text,
     },
-    select: { id: true, text: true, createdAt: true, senderId: true },
+    select: {
+      id: true,
+      text: true,
+      createdAt: true,
+      senderId: true,
+      sender: { select: { id: true, email: true, name: true } },
+    },
+  });
+
+  const broadcast = (
+    globalThis as typeof globalThis & { __chatBroadcast?: ChatBroadcast }
+  ).__chatBroadcast;
+
+  broadcast?.(chat.id, {
+    type: "message",
+    chatId: chat.id,
+    message,
   });
 
   return Response.json(

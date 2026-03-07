@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.mjs --dev",
     "build": "next build --turbopack",
-    "start": "next start",
+    "start": "node server.mjs",
     "lint": "eslint"
   },
   "dependencies": {
@@ -24,7 +24,8 @@
     "prisma": "^7.0.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

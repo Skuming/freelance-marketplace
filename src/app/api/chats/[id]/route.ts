@@ -3,12 +3,12 @@ import { requireSession } from "@/lib/apiAuth";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { session, response } = await requireSession();
   if (!session) return response;
 
-  const { id } = params;
+  const { id } = await params;
 
   const chat = await prisma.chat.findUnique({
     where: { id },

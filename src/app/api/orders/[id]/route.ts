@@ -3,12 +3,12 @@ import { requireRole, requireSession } from "@/lib/apiAuth";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { session, response } = await requireSession();
   if (!session) return response;
 
-  const { id } = params;
+  const { id } = await params;
 
   const raw = await prisma.order.findUnique({
     where: { id },
@@ -66,12 +66,12 @@ export async function GET(
 
 export async function PATCH(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { session, response } = await requireRole(["FREELANCER"]);
   if (!session) return response;
 
-  const { id } = params;
+  const { id } = await params;
 
   const order = await prisma.order.findUnique({
     where: { id },

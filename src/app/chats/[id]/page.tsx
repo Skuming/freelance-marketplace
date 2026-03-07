@@ -3,8 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@db/prisma";
-import MessageComposer from "./MessageComposer";
 import Link from "next/link";
+import ChatRoom from "./ChatRoom";
 
 export default async function ChatPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -56,25 +56,11 @@ export default async function ChatPage({ params }: { params: { id: string } }) {
           </Link>
         </div>
 
-        <div className="border rounded-lg p-4 flex flex-col gap-2">
-          {chat.messages.map((m) => (
-            <div
-              key={m.id}
-              className={
-                m.senderId === session.user.id ? "text-right" : "text-left"
-              }
-            >
-              <div className="inline-block border rounded-md px-3 py-2 max-w-[80%]">
-                <div className="text-sm opacity-70">
-                  {m.sender.name ?? m.sender.email}
-                </div>
-                <div>{m.text}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <MessageComposer chatId={chat.id} />
+        <ChatRoom
+          chatId={chat.id}
+          currentUserId={session.user.id}
+          initialMessages={chat.messages}
+        />
       </main>
     </div>
   );

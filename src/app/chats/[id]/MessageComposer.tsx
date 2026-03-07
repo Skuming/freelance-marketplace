@@ -2,11 +2,27 @@
 
 import Button from "@mui/joy/Button";
 import Input from "@mui/joy/Input";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const MessageComposer = ({ chatId }: { chatId: string }) => {
-  const router = useRouter();
+type Message = {
+  id: string;
+  text: string;
+  createdAt: Date | string;
+  senderId: string;
+  sender: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
+};
+
+const MessageComposer = ({
+  chatId,
+  onSent,
+}: {
+  chatId: string;
+  onSent?: (message: Message) => void;
+}) => {
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,9 +49,12 @@ const MessageComposer = ({ chatId }: { chatId: string }) => {
           return;
         }
 
+        if (json?.data) {
+          onSent?.(json.data as Message);
+        }
+
         setText("");
         setIsLoading(false);
-        router.refresh();
       }}
     >
       <Input
