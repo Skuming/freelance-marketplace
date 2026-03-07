@@ -2,6 +2,9 @@
 
 import Button from "@mui/joy/Button";
 import Input from "@mui/joy/Input";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import { BadgeDollarSign, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,8 +15,11 @@ const DepositForm = () => {
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <form
-      className="flex gap-2 items-start"
+    <Stack
+      component="form"
+      direction={{ xs: "column", sm: "row" }}
+      spacing={1}
+      alignItems={{ xs: "stretch", sm: "flex-start" }}
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null);
@@ -37,19 +43,24 @@ const DepositForm = () => {
         router.refresh();
       }}
     >
-      <div className="flex flex-col gap-2 w-full">
+      <Stack spacing={0.8} sx={{ width: "100%" }}>
         <Input
           placeholder="Сумма пополнения"
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          startDecorator={<BadgeDollarSign size={16} />}
         />
-        {error ? <p className="text-red-500">{error}</p> : null}
-      </div>
-      <Button loading={isLoading} type="submit">
+        {error ? <Typography color="danger">{error}</Typography> : null}
+      </Stack>
+      <Button
+        loading={isLoading}
+        type="submit"
+        startDecorator={<PlusCircle size={16} />}
+      >
         Пополнить
       </Button>
-    </form>
+    </Stack>
   );
 };
 

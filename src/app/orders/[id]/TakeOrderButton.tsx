@@ -1,15 +1,23 @@
 "use client";
 
 import Button from "@mui/joy/Button";
+import Typography from "@mui/joy/Typography";
+import { BriefcaseBusiness } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const TakeOrderButton = ({ orderId }: { orderId: string }) => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col gap-2">
-      {error ? <p className="text-red-500">{error}</p> : null}
+    <>
+      {error ? (
+        <Typography level="body-sm" color="danger">
+          {error}
+        </Typography>
+      ) : null}
       <Button
         loading={isLoading}
         variant="solid"
@@ -26,12 +34,14 @@ const TakeOrderButton = ({ orderId }: { orderId: string }) => {
             return;
           }
 
-          window.location.reload();
+          setIsLoading(false);
+          router.refresh();
         }}
+        startDecorator={<BriefcaseBusiness size={16} />}
       >
         Взять заказ
       </Button>
-    </div>
+    </>
   );
 };
 

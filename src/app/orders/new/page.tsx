@@ -1,6 +1,12 @@
 import Header from "@/widgets/header/ui/Header";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import Box from "@mui/joy/Box";
+import Card from "@mui/joy/Card";
+import Container from "@mui/joy/Container";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import { FilePlus2 } from "lucide-react";
+import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import NewOrderForm from "./NewOrderForm";
 
@@ -16,17 +22,28 @@ export default async function NewOrderPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <Box sx={{ minHeight: "100dvh" }}>
       <Header />
-      <main className="max-w-3xl mx-auto p-4 sm:p-6 flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl sm:text-3xl font-semibold">Новый заказ</h1>
-          <div className="text-sm opacity-80">
-            Этот заказ увидят только фрилансеры
-          </div>
-        </div>
+      <Container
+        maxWidth="md"
+        sx={{ py: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column", gap: 2 }}
+      >
+        <Card variant="outlined" sx={{ borderRadius: "xl", p: 2.25 }}>
+          <Stack spacing={0.45}>
+            <Typography
+              level="h1"
+              sx={{ fontSize: { xs: "1.5rem", sm: "1.8rem" } }}
+              startDecorator={<FilePlus2 size={18} />}
+            >
+              Новый заказ
+            </Typography>
+            <Typography level="body-sm" sx={{ opacity: 0.8 }}>
+              Опишите задачу. Заказ увидят исполнители и смогут взять в работу.
+            </Typography>
+          </Stack>
+        </Card>
         <NewOrderForm />
-      </main>
-    </div>
+      </Container>
+    </Box>
   );
 }

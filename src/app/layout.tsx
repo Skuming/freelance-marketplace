@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import "./globals.css";
 import Providers from "./providers";
+import "@fontsource/inter/latin.css";
+import Box from "@mui/joy/Box";
+import Footer from "@/widgets/footer/ui/Footer";
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],
@@ -22,9 +25,20 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`antialiased`}>
-        <Providers>{children}</Providers>
+    <html lang="ru">
+      <body>
+        <Providers>
+          <Box
+            sx={{
+              minHeight: "100dvh",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box sx={{ flex: 1 }}>{children}</Box>
+            <Footer />
+          </Box>
+        </Providers>
       </body>
     </html>
   );

@@ -8,6 +8,12 @@ import { CssVarsProvider, extendTheme } from "@mui/joy/styles";
 import type { ReactNode } from "react";
 
 const theme = extendTheme({
+  fontFamily: {
+    body: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+    display:
+      "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+    code: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  },
   colorSchemes: {
     light: {
       palette: {

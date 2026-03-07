@@ -1,7 +1,11 @@
 "use client";
 
 import Button from "@mui/joy/Button";
+import Card from "@mui/joy/Card";
 import Input from "@mui/joy/Input";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import { SendHorizonal } from "lucide-react";
 import { useState } from "react";
 
 type Message = {
@@ -28,23 +32,26 @@ const MessageComposer = ({
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <form
-      className="flex gap-2"
+    <Card
+      variant="outlined"
+      component="form"
+      sx={{ borderRadius: "xl", p: 1.25 }}
       onSubmit={async (e) => {
         e.preventDefault();
         setError(null);
-        const t = text.trim();
-        if (!t) return;
+        const trimmed = text.trim();
+        if (!trimmed) return;
 
         setIsLoading(true);
         const res = await fetch(`/api/chats/${chatId}/messages`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: t }),
+          body: JSON.stringify({ text: trimmed }),
         });
         const json = await res.json();
+
         if (!json?.ok) {
-          setError(json?.message ?? "Ошибка");
+          setError(json?.message ?? "Ошибка отправки");
           setIsLoading(false);
           return;
         }
@@ -57,17 +64,28 @@ const MessageComposer = ({
         setIsLoading(false);
       }}
     >
-      <Input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Сообщение..."
-        sx={{ flex: 1 }}
-      />
-      <Button loading={isLoading} type="submit">
-        Отправить
-      </Button>
-      {error ? <p className="text-red-500">{error}</p> : null}
-    </form>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} alignItems="stretch">
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Сообщение..."
+          sx={{ flex: 1 }}
+        />
+        <Button
+          loading={isLoading}
+          type="submit"
+          startDecorator={<SendHorizonal size={16} />}
+          disabled={!text.trim()}
+        >
+          Отправить
+        </Button>
+      </Stack>
+      {error ? (
+        <Typography level="body-sm" color="danger" sx={{ mt: 1 }}>
+          {error}
+        </Typography>
+      ) : null}
+    </Card>
   );
 };
 

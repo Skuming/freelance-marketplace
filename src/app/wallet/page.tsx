@@ -1,8 +1,15 @@
 import Header from "@/widgets/header/ui/Header";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { redirect } from "next/navigation";
 import { prisma } from "@db/prisma";
+import Box from "@mui/joy/Box";
+import Card from "@mui/joy/Card";
+import Chip from "@mui/joy/Chip";
+import Container from "@mui/joy/Container";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import { BadgeDollarSign, WalletMinimal } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import DepositForm from "./DepositForm";
 
 export default async function WalletPage() {
@@ -35,31 +42,77 @@ export default async function WalletPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <Box sx={{ minHeight: "100dvh" }}>
       <Header />
-      <main className="max-w-3xl mx-auto p-4 flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Кошелёк</h1>
+      <Container
+        maxWidth="md"
+        sx={{ py: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column", gap: 2 }}
+      >
+        <Card variant="outlined" sx={{ borderRadius: "xl", p: 2.25 }}>
+          <Typography
+            level="h1"
+            sx={{ fontSize: { xs: "1.55rem", sm: "1.85rem" } }}
+            startDecorator={<WalletMinimal size={18} />}
+          >
+            Кошелек
+          </Typography>
+          <Typography level="body-sm" sx={{ opacity: 0.8, mt: 0.5 }}>
+            Управление балансом и история пополнений
+          </Typography>
+        </Card>
 
-        <div className="border rounded-lg p-4">
-          <div className="text-sm opacity-70">Баланс</div>
-          <div className="text-3xl font-semibold">{wallet.balance} ₽</div>
-        </div>
+        <Card variant="soft" color="success" sx={{ borderRadius: "xl", p: 2 }}>
+          <Typography level="body-sm" sx={{ opacity: 0.85 }}>
+            Текущий баланс
+          </Typography>
+          <Typography level="h2" sx={{ fontSize: "2rem", mt: 0.35 }}>
+            {wallet.balance} ₽
+          </Typography>
+        </Card>
 
-        <div className="border rounded-lg p-4 flex flex-col gap-3">
-          <div className="font-semibold">Пополнение</div>
+        <Card variant="outlined" sx={{ borderRadius: "xl", p: 2 }}>
+          <Typography level="title-md" sx={{ mb: 1 }}>
+            Пополнение
+          </Typography>
           <DepositForm />
-        </div>
+        </Card>
 
-        <div className="border rounded-lg p-4 flex flex-col gap-2">
-          <div className="font-semibold">История</div>
-          {wallet.transactions.map((t) => (
-            <div key={t.id} className="flex justify-between text-sm">
-              <div>{t.description ?? t.type}</div>
-              <div>+{t.amount} ₽</div>
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
+        <Card variant="outlined" sx={{ borderRadius: "xl", p: 2 }}>
+          <Typography level="title-md" sx={{ mb: 1 }}>
+            История
+          </Typography>
+          {wallet.transactions.length === 0 ? (
+            <Typography level="body-sm" sx={{ opacity: 0.75 }}>
+              Транзакций пока нет
+            </Typography>
+          ) : (
+            <Stack spacing={1}>
+              {wallet.transactions.map((tx) => (
+                <Card key={tx.id} variant="soft" color="neutral" sx={{ borderRadius: "lg", p: 1.2 }}>
+                  <Stack direction="row" justifyContent="space-between" spacing={1}>
+                    <Stack spacing={0.35}>
+                      <Typography level="title-sm">
+                        {tx.description ?? tx.type}
+                      </Typography>
+                      <Typography level="body-xs" sx={{ opacity: 0.72 }}>
+                        {new Date(tx.createdAt).toLocaleString("ru-RU")}
+                      </Typography>
+                    </Stack>
+                    <Chip
+                      size="sm"
+                      color="success"
+                      variant="soft"
+                      startDecorator={<BadgeDollarSign size={14} />}
+                    >
+                      +{tx.amount} ₽
+                    </Chip>
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
+          )}
+        </Card>
+      </Container>
+    </Box>
   );
 }

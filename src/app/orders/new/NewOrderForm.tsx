@@ -5,8 +5,10 @@ import Card from "@mui/joy/Card";
 import FormControl from "@mui/joy/FormControl";
 import FormLabel from "@mui/joy/FormLabel";
 import Input from "@mui/joy/Input";
-import Typography from "@mui/joy/Typography";
+import Stack from "@mui/joy/Stack";
 import Textarea from "@mui/joy/Textarea";
+import Typography from "@mui/joy/Typography";
+import { BadgeDollarSign, Layers, Send } from "lucide-react";
 import { useState } from "react";
 
 const NewOrderForm = () => {
@@ -21,19 +23,19 @@ const NewOrderForm = () => {
 
   return (
     <Card
-      className="shadow-xs w-full"
       variant="outlined"
-      sx={{ borderRadius: 18 }}
+      sx={{ borderRadius: "xl", width: "100%", p: 2.25, boxShadow: "sm" }}
     >
-      <div className="flex flex-col gap-1">
-        <Typography level="h3">Публикация заказа</Typography>
+      <Stack spacing={0.45} sx={{ mb: 1 }}>
+        <Typography level="title-lg">Публикация заказа</Typography>
         <Typography level="body-sm" sx={{ opacity: 0.8 }}>
-          Опишите задачу, укажите стек и бюджет
+          Чем конкретнее описание, тем быстрее найдется подходящий исполнитель
         </Typography>
-      </div>
+      </Stack>
 
-      <form
-        className="flex flex-col gap-2"
+      <Stack
+        component="form"
+        spacing={1.25}
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null);
@@ -65,18 +67,18 @@ const NewOrderForm = () => {
           <Input
             placeholder="Например: Сверстать лендинг"
             value={data.title}
-            onChange={(e) => setData((p) => ({ ...p, title: e.target.value }))}
+            onChange={(e) => setData((prev) => ({ ...prev, title: e.target.value }))}
           />
         </FormControl>
 
         <FormControl>
           <FormLabel>Описание</FormLabel>
           <Textarea
-            minRows={5}
-            placeholder="Подробно опишите, что нужно сделать..."
+            minRows={6}
+            placeholder="Опишите задачу, сроки, желаемый результат..."
             value={data.description}
             onChange={(e) =>
-              setData((p) => ({ ...p, description: e.target.value }))
+              setData((prev) => ({ ...prev, description: e.target.value }))
             }
           />
         </FormControl>
@@ -85,8 +87,9 @@ const NewOrderForm = () => {
           <FormLabel>Стек</FormLabel>
           <Input
             placeholder="React, Next.js, Prisma"
+            startDecorator={<Layers size={16} />}
             value={data.stack}
-            onChange={(e) => setData((p) => ({ ...p, stack: e.target.value }))}
+            onChange={(e) => setData((prev) => ({ ...prev, stack: e.target.value }))}
           />
         </FormControl>
 
@@ -94,9 +97,10 @@ const NewOrderForm = () => {
           <FormLabel>Бюджет (₽)</FormLabel>
           <Input
             type="number"
-            placeholder="Например: 15000"
+            placeholder="15000"
+            startDecorator={<BadgeDollarSign size={16} />}
             value={data.budget}
-            onChange={(e) => setData((p) => ({ ...p, budget: e.target.value }))}
+            onChange={(e) => setData((prev) => ({ ...prev, budget: e.target.value }))}
           />
         </FormControl>
 
@@ -107,10 +111,11 @@ const NewOrderForm = () => {
           color="primary"
           loading={isLoading}
           type="submit"
+          startDecorator={<Send size={16} />}
         >
           Опубликовать
         </Button>
-      </form>
+      </Stack>
     </Card>
   );
 };

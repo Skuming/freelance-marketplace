@@ -1,14 +1,21 @@
 import Header from "@/widgets/header/ui/Header";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { redirect } from "next/navigation";
 import { prisma } from "@db/prisma";
+import Box from "@mui/joy/Box";
+import Card from "@mui/joy/Card";
+import Chip from "@mui/joy/Chip";
+import Container from "@mui/joy/Container";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import { ArrowRight, MessageSquareText } from "lucide-react";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function ChatsPage({
   searchParams,
 }: {
-  searchParams?: { orderId?: string };
+  searchParams?: Promise<{ orderId?: string }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -16,7 +23,8 @@ export default async function ChatsPage({
     redirect("/login");
   }
 
-  const orderId = searchParams?.orderId;
+  const resolvedSearchParams = await searchParams;
+  const orderId = resolvedSearchParams?.orderId;
 
   if (orderId) {
     const order = await prisma.order.findUnique({
@@ -67,26 +75,71 @@ export default async function ChatsPage({
   });
 
   return (
-    <div className="min-h-screen">
+    <Box sx={{ minHeight: "100dvh" }}>
       <Header />
-      <main className="max-w-4xl mx-auto p-4 flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Чаты</h1>
+      <Container
+        maxWidth="md"
+        sx={{ py: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column", gap: 2 }}
+      >
+        <Card variant="outlined" sx={{ borderRadius: "xl", p: 2.5 }}>
+          <Typography
+            level="h1"
+            sx={{ fontSize: { xs: "1.5rem", sm: "1.8rem" } }}
+            startDecorator={<MessageSquareText size={18} />}
+          >
+            Чаты
+          </Typography>
+          <Typography level="body-sm" sx={{ opacity: 0.8, mt: 0.5 }}>
+            Переписка с заказчиками и исполнителями в реальном времени
+          </Typography>
+        </Card>
 
-        <div className="grid gap-3">
-          {chats.map((c) => (
-            <Link
-              key={c.id}
-              href={`/chats/${c.id}`}
-              className="border rounded-lg p-4 hover:bg-black/5"
-            >
-              <div className="font-semibold">{c.order.title}</div>
-              <div className="text-sm opacity-70">
-                {c.messages[0]?.text ?? "Сообщений пока нет"}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </main>
-    </div>
+        {chats.length === 0 ? (
+          <Card variant="soft" color="neutral" sx={{ borderRadius: "xl", p: 2 }}>
+            <Typography level="body-sm" sx={{ opacity: 0.8 }}>
+              Чатов пока нет. Они появятся, когда начнется работа по заказу.
+            </Typography>
+          </Card>
+        ) : (
+          <Stack spacing={1.25}>
+            {chats.map((chat) => (
+              <Link
+                key={chat.id}
+                href={`/chats/${chat.id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <Card
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "xl",
+                    p: 1.75,
+                    transition: "0.2s ease",
+                    "&:hover": {
+                      borderColor: "primary.outlinedBorder",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  <Stack spacing={1}>
+                    <Stack direction="row" justifyContent="space-between" spacing={1}>
+                      <Typography level="title-md">{chat.order.title}</Typography>
+                      <ArrowRight size={16} />
+                    </Stack>
+                    <Typography level="body-sm" sx={{ opacity: 0.82 }}>
+                      {chat.messages[0]?.text ?? "Сообщений пока нет"}
+                    </Typography>
+                    {chat.messages[0]?.createdAt ? (
+                      <Chip size="sm" variant="soft" color="neutral" sx={{ width: "fit-content" }}>
+                        {new Date(chat.messages[0].createdAt).toLocaleString("ru-RU")}
+                      </Chip>
+                    ) : null}
+                  </Stack>
+                </Card>
+              </Link>
+            ))}
+          </Stack>
+        )}
+      </Container>
+    </Box>
   );
 }

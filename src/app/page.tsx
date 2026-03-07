@@ -1,53 +1,80 @@
 import Header from "@/widgets/header/ui/Header";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { redirect } from "next/navigation";
-import { prisma } from "@db/prisma";
-import Link from "next/link";
 import { OrderStatus, Prisma } from "@/generated/prisma/client";
+import { prisma } from "@db/prisma";
+import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
+import Card from "@mui/joy/Card";
+import Chip from "@mui/joy/Chip";
+import Container from "@mui/joy/Container";
+import FormControl from "@mui/joy/FormControl";
+import FormLabel from "@mui/joy/FormLabel";
+import Input from "@mui/joy/Input";
+import List from "@mui/joy/List";
+import ListItem from "@mui/joy/ListItem";
+import Option from "@mui/joy/Option";
+import Select from "@mui/joy/Select";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import {
+  BadgeDollarSign,
+  Filter,
+  Layers,
+  Plus,
+  Search,
+  Trophy,
+} from "lucide-react";
+import { getServerSession } from "next-auth";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-function statusBadge(status: string) {
-  const base = "text-xs px-2 py-1 rounded-full border";
+function statusChip(status: string) {
   if (status === "OPEN") {
     return (
-      <span
-        className={`${base} bg-[rgba(20,168,0,0.10)] border-[rgba(20,168,0,0.35)] text-[#0e7a00]`}
-      >
+      <Chip size="sm" color="primary" variant="soft">
         Открыт
-      </span>
+      </Chip>
     );
   }
   if (status === "IN_PROGRESS") {
     return (
-      <span
-        className={`${base} bg-[rgba(45,212,191,0.12)] border-[rgba(45,212,191,0.35)] text-[rgb(15,118,110)]`}
-      >
+      <Chip size="sm" color="warning" variant="soft">
         В работе
-      </span>
+      </Chip>
     );
   }
   if (status === "COMPLETED") {
     return (
-      <span
-        className={`${base} bg-[rgba(34,197,94,0.12)] border-[rgba(34,197,94,0.35)] text-[rgb(21,128,61)]`}
-      >
-        Завершён
-      </span>
+      <Chip size="sm" color="success" variant="soft">
+        Завершен
+      </Chip>
     );
   }
-  return <span className={`${base} opacity-70`}>{status}</span>;
+  return (
+    <Chip size="sm" color="neutral" variant="soft">
+      {status}
+    </Chip>
+  );
+}
+
+function roleDescription(role: string) {
+  if (role === "CUSTOMER") return "Вы видите только свои заказы";
+  if (role === "FREELANCER") {
+    return "Показываются доступные заказы и заказы в работе";
+  }
+  return "Режим администратора";
 }
 
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: {
+  searchParams?: Promise<{
     q?: string;
     status?: string;
     stack?: string;
     minBudget?: string;
     maxBudget?: string;
-  };
+  }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -55,21 +82,23 @@ export default async function Home({
     redirect("/login");
   }
 
-  const q = searchParams?.q ?? "";
-  const stack = searchParams?.stack ?? "";
+  const resolvedSearchParams = await searchParams;
 
-  const statusParam = searchParams?.status;
+  const q = resolvedSearchParams?.q ?? "";
+  const stack = resolvedSearchParams?.stack ?? "";
+
+  const statusParam = resolvedSearchParams?.status;
   const status =
     statusParam &&
     (Object.values(OrderStatus) as string[]).includes(statusParam)
       ? (statusParam as OrderStatus)
       : undefined;
 
-  const minBudget = Number.isFinite(Number(searchParams?.minBudget))
-    ? Number(searchParams?.minBudget)
+  const minBudget = Number.isFinite(Number(resolvedSearchParams?.minBudget))
+    ? Number(resolvedSearchParams?.minBudget)
     : undefined;
-  const maxBudget = Number.isFinite(Number(searchParams?.maxBudget))
-    ? Number(searchParams?.maxBudget)
+  const maxBudget = Number.isFinite(Number(resolvedSearchParams?.maxBudget))
+    ? Number(resolvedSearchParams?.maxBudget)
     : undefined;
 
   const roleWhere: Prisma.OrderWhereInput | undefined =
@@ -138,208 +167,290 @@ export default async function Home({
     return { user, completed: r._count.id };
   });
 
-  const surfaceStyle = {
-    backgroundColor:
-      "rgba(var(--joy-palette-background-surfaceChannel) / 0.72)",
-    borderColor:
-      "rgba(var(--joy-palette-neutral-outlinedBorderChannel) / 0.35)",
-  } as const;
-
   return (
-    <div className="min-h-screen">
+    <Box sx={{ minHeight: "100dvh" }}>
       <Header />
-      <main className="max-w-6xl mx-auto p-4 sm:p-6 flex flex-col gap-5">
-        <div
-          className="rounded-2xl p-5 sm:p-6 border backdrop-blur-md shadow-xs"
-          style={surfaceStyle}
-        >
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-semibold">
+      <Container
+        maxWidth="lg"
+        sx={{
+          py: { xs: 2, sm: 3 },
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: "xl" }}>
+          <Stack spacing={2}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              alignItems={{ xs: "stretch", sm: "flex-end" }}
+              spacing={2}
+            >
+              <Stack spacing={0.5}>
+                <Typography
+                  level="h1"
+                  sx={{ fontSize: { xs: "1.7rem", sm: "2rem" } }}
+                >
                   Биржа заказов
-                </h1>
-                <div className="text-sm opacity-80">
-                  {session.user.role === "CUSTOMER"
-                    ? "Вы видите только свои заказы"
-                    : session.user.role === "FREELANCER"
-                      ? "Вы видите доступные заказы и те, что вы взяли"
-                      : "Админ режим"}
-                </div>
-              </div>
+                </Typography>
+                <Typography level="body-sm" sx={{ opacity: 0.8 }}>
+                  {roleDescription(session.user.role)}
+                </Typography>
+              </Stack>
 
               {session.user.role === "CUSTOMER" ? (
-                <Link
-                  className="rounded-xl px-4 py-2 text-white bg-[#14a800] hover:bg-[#0e7a00] text-center"
+                <Button
+                  component={Link}
                   href="/orders/new"
+                  color="primary"
+                  variant="solid"
+                  startDecorator={<Plus size={16} />}
                 >
                   Создать заказ
-                </Link>
+                </Button>
               ) : null}
-            </div>
+            </Stack>
 
-            <form
+            <Stack
+              component="form"
               action="/"
               method="get"
-              className="flex flex-col sm:flex-row gap-2"
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
             >
-              <input
+              <Input
                 name="q"
                 defaultValue={q}
                 placeholder="Поиск по названию заказа..."
-                className="w-full border rounded-xl px-4 py-3"
-                style={{
-                  backgroundColor:
-                    "rgba(var(--joy-palette-background-surfaceChannel) / 0.55)",
-                  borderColor:
-                    "rgba(var(--joy-palette-neutral-outlinedBorderChannel) / 0.35)",
-                }}
+                startDecorator={<Search size={16} />}
+                sx={{ flex: 1 }}
               />
-              <button className="rounded-xl px-4 py-3 border hover:bg-black/5">
+              <Button type="submit" variant="solid">
                 Найти
-              </button>
-            </form>
-          </div>
-        </div>
+              </Button>
+            </Stack>
+          </Stack>
+        </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr_280px] gap-4 items-start">
-          <aside
-            className="rounded-2xl border backdrop-blur-md shadow-xs p-4 flex flex-col gap-3"
-            style={surfaceStyle}
-          >
-            <div className="font-semibold">Фильтры</div>
-            <form action="/" method="get" className="flex flex-col gap-2">
-              <input type="hidden" name="q" defaultValue={q} />
-              <div className="text-sm opacity-80">Статус</div>
-              <select
-                name="status"
-                defaultValue={statusParam ?? ""}
-                className="w-full border rounded-xl px-3 py-2"
-                style={surfaceStyle}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              xl: "280px minmax(0, 1fr) 280px",
+            },
+            gap: 2,
+            alignItems: "start",
+          }}
+        >
+          <Card variant="outlined" sx={{ borderRadius: "xl", p: 2, overflow: "hidden" }}>
+            <Stack
+              component="form"
+              action="/"
+              method="get"
+              spacing={1.5}
+              sx={{ width: "100%", minWidth: 0 }}
+            >
+              <Typography level="title-md" startDecorator={<Filter size={16} />}>
+                Фильтры
+              </Typography>
+
+              <FormControl size="sm" sx={{ minWidth: 0 }}>
+                <FormLabel>Поиск</FormLabel>
+                <Input
+                  name="q"
+                  defaultValue={q}
+                  placeholder="Название заказа"
+                  startDecorator={<Search size={14} />}
+                  sx={{ minWidth: 0 }}
+                />
+              </FormControl>
+
+              <FormControl size="sm" sx={{ minWidth: 0 }}>
+                <FormLabel>Статус</FormLabel>
+                <Select name="status" defaultValue={statusParam ?? ""}>
+                  <Option value="">Любой</Option>
+                  <Option value={OrderStatus.OPEN}>OPEN</Option>
+                  <Option value={OrderStatus.IN_PROGRESS}>IN_PROGRESS</Option>
+                  <Option value={OrderStatus.COMPLETED}>COMPLETED</Option>
+                </Select>
+              </FormControl>
+
+              <FormControl size="sm" sx={{ minWidth: 0 }}>
+                <FormLabel>Стек содержит</FormLabel>
+                <Input
+                  name="stack"
+                  defaultValue={stack}
+                  placeholder="React"
+                  startDecorator={<Layers size={14} />}
+                  sx={{ minWidth: 0 }}
+                />
+              </FormControl>
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gap: 1,
+                  gridTemplateColumns: {
+                    xs: "repeat(2, minmax(0, 1fr))",
+                    xl: "1fr",
+                  },
+                }}
               >
-                <option value="">Любой</option>
-                <option value={OrderStatus.OPEN}>OPEN</option>
-                <option value={OrderStatus.IN_PROGRESS}>IN_PROGRESS</option>
-                <option value={OrderStatus.COMPLETED}>COMPLETED</option>
-              </select>
-
-              <div className="text-sm opacity-80">Стек содержит</div>
-              <input
-                name="stack"
-                defaultValue={stack}
-                placeholder="React"
-                className="w-full border rounded-xl px-3 py-2"
-                style={surfaceStyle}
-              />
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex flex-col gap-1">
-                  <div className="text-sm opacity-80">Бюджет от</div>
-                  <input
+                <FormControl size="sm" sx={{ minWidth: 0 }}>
+                  <FormLabel>Бюджет от</FormLabel>
+                  <Input
                     name="minBudget"
-                    defaultValue={searchParams?.minBudget ?? ""}
+                    defaultValue={resolvedSearchParams?.minBudget ?? ""}
                     type="number"
                     placeholder="0"
-                    className="w-full border rounded-xl px-3 py-2"
-                    style={surfaceStyle}
+                    sx={{ minWidth: 0 }}
                   />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <div className="text-sm opacity-80">Бюджет до</div>
-                  <input
+                </FormControl>
+                <FormControl size="sm" sx={{ minWidth: 0 }}>
+                  <FormLabel>Бюджет до</FormLabel>
+                  <Input
                     name="maxBudget"
-                    defaultValue={searchParams?.maxBudget ?? ""}
+                    defaultValue={resolvedSearchParams?.maxBudget ?? ""}
                     type="number"
                     placeholder="50000"
-                    className="w-full border rounded-xl px-3 py-2"
-                    style={surfaceStyle}
+                    sx={{ minWidth: 0 }}
                   />
-                </div>
-              </div>
+                </FormControl>
+              </Box>
 
-              <button className="rounded-xl px-4 py-2 border hover:bg-black/5">
-                Применить
-              </button>
+              <Stack
+                direction={{ xs: "column", sm: "row", xl: "column" }}
+                spacing={1}
+              >
+                <Button type="submit" variant="solid" sx={{ flex: 1 }}>
+                  Применить
+                </Button>
+                <Button component={Link} href="/" variant="outlined" color="neutral">
+                  Сброс
+                </Button>
+              </Stack>
+            </Stack>
+          </Card>
 
-              <Link className="text-sm opacity-80 hover:opacity-100" href="/">
-                Сбросить
-              </Link>
-            </form>
-          </aside>
+          <Stack spacing={1.5}>
+            {orders.length === 0 ? (
+              <Card variant="soft" color="neutral" sx={{ borderRadius: "xl", p: 2.5 }}>
+                <Typography level="body-sm" sx={{ opacity: 0.8 }}>
+                  По текущим фильтрам заказов не найдено.
+                </Typography>
+              </Card>
+            ) : null}
 
-          <section>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
-              {orders.map((o) => (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+                gap: 1.5,
+              }}
+            >
+              {orders.map((order) => (
                 <Link
-                  key={o.id}
-                  href={`/orders/${o.id}`}
-                  className="rounded-2xl border backdrop-blur-md shadow-xs p-5 hover:translate-y-[-1px] hover:shadow-md transition"
-                  style={surfaceStyle}
+                  key={order.id}
+                  href={`/orders/${order.id}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1">
-                      <div className="font-semibold text-lg leading-snug">
-                        {o.title}
-                      </div>
-                      <div className="text-sm opacity-80 line-clamp-2">
-                        Стек: {o.stack}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      {statusBadge(o.status)}
-                      <div className="font-semibold">{o.budget} ₽</div>
-                    </div>
-                  </div>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      borderRadius: "xl",
+                      p: 2,
+                      height: "100%",
+                      transition: "0.2s ease",
+                      "&:hover": {
+                        transform: "translateY(-2px)",
+                        boxShadow: "sm",
+                        borderColor: "primary.outlinedBorder",
+                      },
+                    }}
+                  >
+                    <Stack spacing={1.5}>
+                      <Stack direction="row" justifyContent="space-between" spacing={1}>
+                        <Typography level="title-md">{order.title}</Typography>
+                        {statusChip(order.status)}
+                      </Stack>
+                      <Typography
+                        level="body-sm"
+                        sx={{
+                          opacity: 0.85,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        Стек: {order.stack}
+                      </Typography>
+                      <Typography
+                        level="title-sm"
+                        startDecorator={<BadgeDollarSign size={16} />}
+                        sx={{ mt: "auto" }}
+                      >
+                        {order.budget} ₽
+                      </Typography>
+                    </Stack>
+                  </Card>
                 </Link>
               ))}
-            </div>
+            </Box>
+          </Stack>
 
-            {orders.length === 0 ? (
-              <div className="text-center opacity-80 py-8">
-                Нет заказов по текущим фильтрам
-              </div>
-            ) : null}
-          </section>
+          <Card variant="outlined" sx={{ borderRadius: "xl", p: 2 }}>
+            <Stack spacing={1.25}>
+              <Typography level="title-md" startDecorator={<Trophy size={16} />}>
+                Лидеры
+              </Typography>
+              <Typography level="body-sm" sx={{ opacity: 0.78 }}>
+                Топ исполнителей по завершенным заказам
+              </Typography>
 
-          <aside
-            className="rounded-2xl border backdrop-blur-md shadow-xs p-4 flex flex-col gap-3"
-            style={surfaceStyle}
-          >
-            <div className="font-semibold">Лидерборд</div>
-            <div className="text-sm opacity-80">Топ по выполненным заказам</div>
-            <div className="flex flex-col gap-2">
-              {leaderboard.map((row, idx) => (
-                <div
-                  key={row.user?.id ?? idx}
-                  className="flex items-center justify-between gap-2 rounded-xl border px-3 py-2"
-                  style={{
-                    backgroundColor:
-                      "rgba(var(--joy-palette-background-surfaceChannel) / 0.55)",
-                    borderColor:
-                      "rgba(var(--joy-palette-neutral-outlinedBorderChannel) / 0.28)",
-                  }}
-                >
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold truncate">
-                      #{idx + 1}{" "}
-                      {row.user?.name ?? row.user?.email ?? "Unknown"}
-                    </div>
-                    {row.user?.email ? (
-                      <div className="text-xs opacity-70 truncate">
-                        {row.user.email}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="text-sm font-semibold">{row.completed}</div>
-                </div>
-              ))}
               {leaderboard.length === 0 ? (
-                <div className="text-sm opacity-70">Пока нет данных</div>
-              ) : null}
-            </div>
-          </aside>
-        </div>
-      </main>
-    </div>
+                <Typography level="body-sm" sx={{ opacity: 0.7 }}>
+                  Пока данных нет
+                </Typography>
+              ) : (
+                <List size="sm" sx={{ "--List-gap": "8px" }}>
+                  {leaderboard.map((row, idx) => (
+                    <ListItem key={row.user?.id ?? idx}>
+                      <Card
+                        variant="soft"
+                        color="neutral"
+                        sx={{
+                          width: "100%",
+                          borderRadius: "lg",
+                          p: 1.25,
+                        }}
+                      >
+                        <Stack direction="row" justifyContent="space-between" spacing={1}>
+                          <Stack>
+                            <Typography level="title-sm">
+                              #{idx + 1} {row.user?.name ?? row.user?.email ?? "Unknown"}
+                            </Typography>
+                            {row.user?.email ? (
+                              <Typography level="body-xs" sx={{ opacity: 0.7 }}>
+                                {row.user.email}
+                              </Typography>
+                            ) : null}
+                          </Stack>
+                          <Chip size="sm" color="success" variant="soft">
+                            {row.completed}
+                          </Chip>
+                        </Stack>
+                      </Card>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Stack>
+          </Card>
+        </Box>
+      </Container>
+    </Box>
   );
 }
