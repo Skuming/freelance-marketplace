@@ -20,20 +20,14 @@ type Message = {
   };
 };
 
-type WsEvent =
-  | {
-      type: "message";
-      chatId: string;
-      message: Message;
-    }
-  | {
-      type: "subscribed";
-      chatId: string;
-    }
-  | {
-      type: "error";
-      message: string;
-    };
+type ChatPayload = {
+  messages?: Message[];
+};
+
+type ChatApiResponse = {
+  ok?: boolean;
+  data?: ChatPayload;
+};
 
 const ChatRoom = ({
   chatId,
@@ -62,31 +56,36 @@ const ChatRoom = ({
     });
   }, []);
 
+  const syncMessages = useCallback(async () => {
+    try {
+      const url = "/api/chats/" + encodeURIComponent(chatId);
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) return;
+
+      const payload = (await res.json()) as ChatApiResponse;
+      const incoming = payload?.data?.messages;
+
+      if (!Array.isArray(incoming)) return;
+
+      for (const message of incoming) {
+        addMessage(message);
+      }
+    } catch {
+      // Silent fail: polling will retry on next interval.
+    }
+  }, [chatId, addMessage]);
+
   useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
+    void syncMessages();
 
-    ws.addEventListener("open", () => {
-      ws.send(JSON.stringify({ type: "subscribe", chatId }));
-    });
-
-    ws.addEventListener("message", (event) => {
-      let payload: WsEvent;
-      try {
-        payload = JSON.parse(String(event.data)) as WsEvent;
-      } catch {
-        return;
-      }
-
-      if (payload.type === "message" && payload.chatId === chatId) {
-        addMessage(payload.message);
-      }
-    });
+    const intervalId = window.setInterval(() => {
+      void syncMessages();
+    }, 3000);
 
     return () => {
-      ws.close();
+      window.clearInterval(intervalId);
     };
-  }, [chatId, addMessage]);
+  }, [syncMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });

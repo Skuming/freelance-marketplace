@@ -22,3 +22,32 @@ Email: freelancer@freelance.local
 Email: customer@freelance.local
 Пароль: Customer123!Secure
 ```
+
+## Деплой на Vercel (упрощённый)
+
+1. Подключи репозиторий в Vercel.
+2. В `Project Settings -> Environment Variables` добавь:
+   - `DATABASE_URL`
+   - `AUTH_SECRET` (или `NEXTAUTH_SECRET`, но в коде используется `AUTH_SECRET`)
+3. В `Build Command` укажи:
+
+```bash
+npm run vercel-build
+```
+
+4. `Install Command` оставь стандартным (`npm install`).
+5. `Output Directory` не задавай (по умолчанию для Next.js).
+
+## Полезные команды
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run db:migrate:deploy
+npm run db:seed
+```
+
+## Примечание по чату
+
+Для Vercel чат работает через HTTP polling (без WebSocket custom server). Это сделано, чтобы деплой был стабильным в serverless-среде.
