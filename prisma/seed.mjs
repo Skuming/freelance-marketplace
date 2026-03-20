@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -84,7 +84,9 @@ async function main() {
 
   console.log("Seed completed.");
   for (const account of seeded) {
-    console.log(`${account.label} (${account.role}): ${account.email} / ${account.password}`);
+    console.log(
+      `${account.label} (${account.role}): ${account.email} / ${account.password}`,
+    );
   }
 }
 

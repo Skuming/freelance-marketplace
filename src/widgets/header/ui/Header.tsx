@@ -12,19 +12,13 @@ import Sheet from "@mui/joy/Sheet";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import { useColorScheme } from "@mui/joy/styles";
-import {
-  LogIn,
-  LogOut,
-  Menu,
-  MoonStar,
-  Sun,
-  UserPlus,
-  Workflow,
-} from "lucide-react";
+import { LogIn, LogOut, Menu, MoonStar, Sun, UserPlus } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 import Nav from "./Nav";
+import Image from "next/image";
+import Logo from "@/../public/logo.png";
 
 const Header = () => {
   const { data: session } = useSession();
@@ -73,7 +67,7 @@ const Header = () => {
               href="/"
               variant="plain"
               color="neutral"
-              startDecorator={<Workflow size={18} />}
+              startDecorator={<Image src={Logo} alt="logo" width={32} />}
               sx={{
                 px: 1,
                 fontWeight: 700,

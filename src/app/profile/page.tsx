@@ -79,7 +79,7 @@ export default async function ProfilePage() {
                 <Typography level="body-sm" sx={{ opacity: 0.75 }}>
                   Баланс
                 </Typography>
-                <Typography level="title-sm" sx={{ mt: 0.7 }}>
+                <Typography component="div" level="title-sm" sx={{ mt: 0.7 }}>
                   <Stack direction="row" spacing={0.6} alignItems="center">
                     <Wallet size={15} />
                     <span>{user.wallet?.balance ?? 0} ₽</span>

@@ -23,18 +23,14 @@ Email: customer@freelance.local
 Пароль: Customer123!Secure
 ```
 
-## Деплой на Vercel (упрощённый)
+## Деплой на Vercel (без ручной Build Command)
 
 1. Подключи репозиторий в Vercel.
 2. В `Project Settings -> Environment Variables` добавь:
-   - `DATABASE_URL`
-   - `AUTH_SECRET` (или `NEXTAUTH_SECRET`, но в коде используется `AUTH_SECRET`)
-3. В `Build Command` укажи:
-
-```bash
-npm run vercel-build
-```
-
+   - `DATABASE_URL` (лучше использовать pooled URL от провайдера Postgres)
+   - `AUTH_SECRET` (длинная случайная строка)
+   - `NEXTAUTH_URL` (`https://<project>.vercel.app` или ваш домен)
+3. Ничего в `Build Command` менять не нужно: `npm run build` уже выполняет `prisma generate`, `prisma migrate deploy`, `next build`.
 4. `Install Command` оставь стандартным (`npm install`).
 5. `Output Directory` не задавай (по умолчанию для Next.js).
 

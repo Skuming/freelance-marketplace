@@ -179,7 +179,10 @@ export default async function Home({
           gap: 2,
         }}
       >
-        <Card variant="outlined" sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: "xl" }}>
+        <Card
+          variant="outlined"
+          sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: "xl" }}
+        >
           <Stack spacing={2}>
             <Stack
               direction={{ xs: "column", sm: "row" }}
@@ -244,7 +247,10 @@ export default async function Home({
             alignItems: "start",
           }}
         >
-          <Card variant="outlined" sx={{ borderRadius: "xl", p: 2, overflow: "hidden" }}>
+          <Card
+            variant="outlined"
+            sx={{ borderRadius: "xl", p: 2, overflow: "hidden" }}
+          >
             <Stack
               component="form"
               action="/"
@@ -252,7 +258,10 @@ export default async function Home({
               spacing={1.5}
               sx={{ width: "100%", minWidth: 0 }}
             >
-              <Typography level="title-md" startDecorator={<Filter size={16} />}>
+              <Typography
+                level="title-md"
+                startDecorator={<Filter size={16} />}
+              >
                 Фильтры
               </Typography>
 
@@ -327,7 +336,12 @@ export default async function Home({
                 <Button type="submit" variant="solid" sx={{ flex: 1 }}>
                   Применить
                 </Button>
-                <Button component={Link} href="/" variant="outlined" color="neutral">
+                <Button
+                  component={Link}
+                  href="/"
+                  variant="outlined"
+                  color="neutral"
+                >
                   Сброс
                 </Button>
               </Stack>
@@ -336,7 +350,11 @@ export default async function Home({
 
           <Stack spacing={1.5}>
             {orders.length === 0 ? (
-              <Card variant="soft" color="neutral" sx={{ borderRadius: "xl", p: 2.5 }}>
+              <Card
+                variant="soft"
+                color="neutral"
+                sx={{ borderRadius: "xl", p: 2.5 }}
+              >
                 <Typography level="body-sm" sx={{ opacity: 0.8 }}>
                   По текущим фильтрам заказов не найдено.
                 </Typography>
@@ -346,7 +364,10 @@ export default async function Home({
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" },
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                },
                 gap: 1.5,
               }}
             >
@@ -371,7 +392,11 @@ export default async function Home({
                     }}
                   >
                     <Stack spacing={1.5}>
-                      <Stack direction="row" justifyContent="space-between" spacing={1}>
+                      <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={1}
+                      >
                         <Typography level="title-md">{order.title}</Typography>
                         {statusChip(order.status)}
                       </Stack>
@@ -403,7 +428,10 @@ export default async function Home({
 
           <Card variant="outlined" sx={{ borderRadius: "xl", p: 2 }}>
             <Stack spacing={1.25}>
-              <Typography level="title-md" startDecorator={<Trophy size={16} />}>
+              <Typography
+                level="title-md"
+                startDecorator={<Trophy size={16} />}
+              >
                 Лидеры
               </Typography>
               <Typography level="body-sm" sx={{ opacity: 0.78 }}>
@@ -427,10 +455,15 @@ export default async function Home({
                           p: 1.25,
                         }}
                       >
-                        <Stack direction="row" justifyContent="space-between" spacing={1}>
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          spacing={1}
+                        >
                           <Stack>
                             <Typography level="title-sm">
-                              #{idx + 1} {row.user?.name ?? row.user?.email ?? "Unknown"}
+                              #{idx + 1}{" "}
+                              {row.user?.name ?? row.user?.email ?? "Unknown"}
                             </Typography>
                             {row.user?.email ? (
                               <Typography level="body-xs" sx={{ opacity: 0.7 }}>
