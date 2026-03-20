@@ -14,41 +14,78 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString }),
 });
 
-async function main() {
-  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@freelance.local";
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "Admin123!Secure";
-  const adminName = process.env.SEED_ADMIN_NAME ?? "Administrator";
+const accounts = [
+  {
+    label: "Admin",
+    email: process.env.SEED_ADMIN_EMAIL ?? "admin@freelance.local",
+    password: process.env.SEED_ADMIN_PASSWORD ?? "Admin123!Secure",
+    name: process.env.SEED_ADMIN_NAME ?? "Administrator",
+    role: "ADMIN",
+  },
+  {
+    label: "Freelancer",
+    email: process.env.SEED_FREELANCER_EMAIL ?? "freelancer@freelance.local",
+    password: process.env.SEED_FREELANCER_PASSWORD ?? "Freelancer123!Secure",
+    name: process.env.SEED_FREELANCER_NAME ?? "Freelancer Demo",
+    role: "FREELANCER",
+  },
+  {
+    label: "Customer",
+    email: process.env.SEED_CUSTOMER_EMAIL ?? "customer@freelance.local",
+    password: process.env.SEED_CUSTOMER_PASSWORD ?? "Customer123!Secure",
+    name: process.env.SEED_CUSTOMER_NAME ?? "Customer Demo",
+    role: "CUSTOMER",
+  },
+];
 
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
+async function upsertUser(user) {
+  const hashedPassword = await bcrypt.hash(user.password, 10);
 
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
+  const saved = await prisma.user.upsert({
+    where: { email: user.email },
     update: {
-      name: adminName,
+      name: user.name,
       password: hashedPassword,
-      role: "ADMIN",
+      role: user.role,
     },
     create: {
-      email: adminEmail,
-      name: adminName,
+      email: user.email,
+      name: user.name,
       password: hashedPassword,
-      role: "ADMIN",
+      role: user.role,
     },
-    select: { id: true, email: true },
+    select: { id: true, email: true, role: true },
   });
 
   await prisma.wallet.upsert({
-    where: { userId: admin.id },
+    where: { userId: saved.id },
     update: {},
     create: {
-      userId: admin.id,
+      userId: saved.id,
       balance: 0,
     },
   });
 
+  return saved;
+}
+
+async function main() {
+  const seeded = [];
+
+  for (const account of accounts) {
+    const saved = await upsertUser(account);
+    seeded.push({
+      label: account.label,
+      email: saved.email,
+      password: account.password,
+      role: saved.role,
+    });
+  }
+
   console.log("Seed completed.");
-  console.log(`Admin email: ${admin.email}`);
-  console.log(`Admin password: ${adminPassword}`);
+  for (const account of seeded) {
+    console.log(`${account.label} (${account.role}): ${account.email} / ${account.password}`);
+  }
 }
 
 main()

@@ -2,6 +2,7 @@ import Header from "@/widgets/header/ui/Header";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@db/prisma";
 import Box from "@mui/joy/Box";
+import Button from "@mui/joy/Button";
 import Card from "@mui/joy/Card";
 import Chip from "@mui/joy/Chip";
 import Container from "@mui/joy/Container";
@@ -9,6 +10,7 @@ import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
 import { Coins, ShieldCheck, UsersRound } from "lucide-react";
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
@@ -76,30 +78,45 @@ export default async function AdminPage() {
               <Typography level="title-lg" startDecorator={<UsersRound size={17} />}>
                 Пользователи
               </Typography>
+              <Typography level="body-sm" sx={{ opacity: 0.8 }}>
+                Нажми на пользователя, чтобы открыть сводку и редактирование
+              </Typography>
               <Stack spacing={1}>
                 {users.map((user) => (
                   <Card key={user.id} variant="soft" color="neutral" sx={{ borderRadius: "lg", p: 1.25 }}>
-                    <Stack
-                      direction={{ xs: "column", sm: "row" }}
-                      justifyContent="space-between"
-                      spacing={1}
-                    >
-                      <Stack spacing={0.4}>
-                        <Typography level="title-sm">
-                          {user.name ? `${user.name} (${user.email})` : user.email}
-                        </Typography>
-                        <Typography level="body-xs" sx={{ opacity: 0.75 }}>
-                          ID: {user.id.slice(0, 8)}
-                        </Typography>
+                    <Stack spacing={1}>
+                      <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        justifyContent="space-between"
+                        spacing={1}
+                      >
+                        <Stack spacing={0.4}>
+                          <Typography level="title-sm">
+                            {user.name ? `${user.name} (${user.email})` : user.email}
+                          </Typography>
+                          <Typography level="body-xs" sx={{ opacity: 0.75 }}>
+                            ID: {user.id.slice(0, 8)}
+                          </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={0.75}>
+                          <Chip size="sm" variant="soft" color="neutral">
+                            {user.role}
+                          </Chip>
+                          <Chip size="sm" variant="soft" color="success">
+                            {user.wallet?.balance ?? 0} ₽
+                          </Chip>
+                        </Stack>
                       </Stack>
-                      <Stack direction="row" spacing={0.75}>
-                        <Chip size="sm" variant="soft" color="neutral">
-                          {user.role}
-                        </Chip>
-                        <Chip size="sm" variant="soft" color="success">
-                          {user.wallet?.balance ?? 0} ₽
-                        </Chip>
-                      </Stack>
+
+                      <Button
+                        component={Link}
+                        href={`/admin/users/${user.id}`}
+                        size="sm"
+                        variant="outlined"
+                        sx={{ width: "fit-content" }}
+                      >
+                        Открыть сводку
+                      </Button>
                     </Stack>
                   </Card>
                 ))}
@@ -111,6 +128,9 @@ export default async function AdminPage() {
             <Stack spacing={1.5}>
               <Typography level="title-lg" startDecorator={<Coins size={17} />}>
                 Заказы
+              </Typography>
+              <Typography level="body-sm" sx={{ opacity: 0.8 }}>
+                Открой заказ, чтобы изменить его параметры
               </Typography>
               <Stack spacing={1}>
                 {orders.map((order) => (
@@ -129,6 +149,16 @@ export default async function AdminPage() {
                         {order.customer.email}
                         {order.freelancer?.email ? ` -> ${order.freelancer.email}` : " -> без исполнителя"}
                       </Typography>
+
+                      <Button
+                        component={Link}
+                        href={`/orders/${order.id}`}
+                        size="sm"
+                        variant="outlined"
+                        sx={{ width: "fit-content" }}
+                      >
+                        Открыть и изменить
+                      </Button>
                     </Stack>
                   </Card>
                 ))}

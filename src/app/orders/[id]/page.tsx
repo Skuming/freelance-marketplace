@@ -12,6 +12,7 @@ import { BadgeDollarSign, MessageSquareText, UserRound } from "lucide-react";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import AdminOrderEditor from "./AdminOrderEditor";
 import TakeOrderButton from "./TakeOrderButton";
 
 function statusChip(status: string) {
@@ -72,6 +73,19 @@ export default async function OrderPage({
       order.freelancerId === null);
 
   if (!canSee) notFound();
+
+  const freelancers =
+    session.user.role === "ADMIN"
+      ? await prisma.user.findMany({
+          where: { role: "FREELANCER" },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        })
+      : [];
 
   return (
     <Box sx={{ minHeight: "100dvh" }}>
@@ -137,50 +151,65 @@ export default async function OrderPage({
             </Typography>
           </Card>
 
-          <Card variant="outlined" sx={{ borderRadius: "xl", p: 2 }}>
-            <Stack spacing={1.1}>
-              <Typography level="title-md">Участники</Typography>
+          <Stack spacing={2}>
+            <Card variant="outlined" sx={{ borderRadius: "xl", p: 2 }}>
+              <Stack spacing={1.1}>
+                <Typography level="title-md">Участники</Typography>
 
-              <Card variant="soft" color="neutral" sx={{ borderRadius: "lg", p: 1.2 }}>
-                <Typography
-                  level="body-sm"
-                  startDecorator={<UserRound size={14} />}
-                  sx={{ opacity: 0.8 }}
-                >
-                  Заказчик
-                </Typography>
-                <Typography level="title-sm">{order.customer.email}</Typography>
-              </Card>
+                <Card variant="soft" color="neutral" sx={{ borderRadius: "lg", p: 1.2 }}>
+                  <Typography
+                    level="body-sm"
+                    startDecorator={<UserRound size={14} />}
+                    sx={{ opacity: 0.8 }}
+                  >
+                    Заказчик
+                  </Typography>
+                  <Typography level="title-sm">{order.customer.email}</Typography>
+                </Card>
 
-              <Card variant="soft" color="neutral" sx={{ borderRadius: "lg", p: 1.2 }}>
-                <Typography
-                  level="body-sm"
-                  startDecorator={<UserRound size={14} />}
-                  sx={{ opacity: 0.8 }}
-                >
-                  Исполнитель
-                </Typography>
-                <Typography level="title-sm">
-                  {order.freelancer ? order.freelancer.email : "Не выбран"}
-                </Typography>
-              </Card>
+                <Card variant="soft" color="neutral" sx={{ borderRadius: "lg", p: 1.2 }}>
+                  <Typography
+                    level="body-sm"
+                    startDecorator={<UserRound size={14} />}
+                    sx={{ opacity: 0.8 }}
+                  >
+                    Исполнитель
+                  </Typography>
+                  <Typography level="title-sm">
+                    {order.freelancer ? order.freelancer.email : "Не выбран"}
+                  </Typography>
+                </Card>
 
-              {order.freelancerId ? (
-                <Button
-                  component={Link}
-                  href={`/chats?orderId=${order.id}`}
-                  variant="solid"
-                  startDecorator={<MessageSquareText size={16} />}
-                >
-                  Открыть чат
-                </Button>
-              ) : (
-                <Typography level="body-sm" sx={{ opacity: 0.7 }}>
-                  Чат станет доступен после назначения исполнителя.
-                </Typography>
-              )}
-            </Stack>
-          </Card>
+                {order.freelancerId ? (
+                  <Button
+                    component={Link}
+                    href={`/chats?orderId=${order.id}`}
+                    variant="solid"
+                    startDecorator={<MessageSquareText size={16} />}
+                  >
+                    Открыть чат
+                  </Button>
+                ) : (
+                  <Typography level="body-sm" sx={{ opacity: 0.7 }}>
+                    Чат станет доступен после назначения исполнителя.
+                  </Typography>
+                )}
+              </Stack>
+            </Card>
+
+            {session.user.role === "ADMIN" ? (
+              <AdminOrderEditor
+                orderId={order.id}
+                initialTitle={order.title}
+                initialDescription={order.description}
+                initialStack={order.stack}
+                initialBudget={order.budget}
+                initialStatus={order.status}
+                initialFreelancerId={order.freelancerId}
+                freelancers={freelancers}
+              />
+            ) : null}
+          </Stack>
         </Box>
       </Container>
     </Box>
